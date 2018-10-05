@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>FoundIt</title>
+    <link rel="stylesheet" href="/css/index_style.css"/>
+    <link rel="icon" type="image/png" href="/images/favicon.png">
+    <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet'>
+</head>
+
+<body>
+
+    <header>
+        <img src="/images/logo-main.png" alt="FoundIt Logo">
+    </header>
+
+    <br>
+
+    <form id="keywords" action="/" method="post">
+        <input type="text" name="keywords" placeholder="Search"></br>
+        <input type="submit" value="Search" style = "padding: 10px 20px">
+    </form>
+
+    <br><br>
+
+    <table align="center">
+        <tr class="top">
+            <td class="title">Current Search Results</td>
+            <td class="title">Top 20 Search Results</td>
+        </tr>
+        <tr>
+        <td class="left">
+            <table id=”results”>
+                <tr class="headrow">
+                    <td class="headrow">Word</td>
+                    <td class="headrow">Count</td>
+                </tr>
+                %for word, count in results.items():
+                    <tr class="bodyrow">
+                        <td>{{word}}</td>
+                        <td>{{count}}</td>
+                    </tr>
+                %end
+            </table>
+        </td>
+        <td class="right">
+            <table id="history">
+                <tr class="headrow">
+                    <td class="headrow">Word</td>
+                    <td class="headrow">Count</td>
+                </tr>
+                %for word, count in historic_results.items():
+                    <tr class="bodyrow">
+                        <td>{{word}}</td>
+                        <td>{{count}}</td>
+                    </tr>
+                %end
+            </table>
+        </td>
+        </tr>
+    </table>
+
+</body>
+
+</html>
