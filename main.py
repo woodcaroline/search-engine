@@ -10,7 +10,7 @@ from bottle.bottle import route, run, template, static_file, request
 import search_handler
 
 
-historic_keywords = dict()  # Global variable to store every word entered by the user since server launch
+historic_keywords = dict()  # Global variable to store every word searched by the user since server launch
 
 
 #
@@ -39,7 +39,7 @@ def form_handler():
 
 
 #
-# Serve static CSS files
+# Serve static CSS & image files
 #
 @route('/<filename:path>')
 def send_static(filename):
@@ -47,6 +47,6 @@ def send_static(filename):
 
 
 #
-# Run the server
+# Run the server on localhost:8080
 #
 run(host='localhost', port=8080, debug=True)
