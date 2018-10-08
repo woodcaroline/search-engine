@@ -56,6 +56,7 @@ class crawler(object):
         self._revert_doc_id = { } # stores the url that corresponds to a doc_id
         self._revert_word_id = { } # stores the word that corresponds to a word_id
 
+        self._doc_index = defaultdict(set) # stores the word_id's that correspond to a doc_id
         self._inverted_index = defaultdict(set) # stores doc_id's that correspond to a word_id
         self._resolved_inverted_index = defaultdict(set) # stores url's that correspond to a word
 
@@ -164,7 +165,7 @@ class crawler(object):
         self._word_id_cache[word] = word_id
 
         # CSC326 Lab 1 - BEGIN
-        self._revert_word_id[word_id] = word;
+        self._revert_word_id[word_id] = str(word)
         # CSC326 Lab 1 - END
 
         return word_id
@@ -182,7 +183,7 @@ class crawler(object):
         self._doc_id_cache[url] = doc_id
 
         # CSC326 Lab 1 - BEGIN
-        self._revert_doc_id[doc_id] = str(url);
+        self._revert_doc_id[doc_id] = str(url)
         # CSC326 Lab 1 - END
 
         return doc_id
@@ -213,7 +214,7 @@ class crawler(object):
         # TODO update document title for document id self._curr_doc_id
 
         # CSC326 Lab 1 - BEGIN
-        self._page_title[self._curr_doc_id] = str(title_text);
+        self._page_title[self._curr_doc_id] = str(title_text)
         # CSC326 Lab 1 - END
 
     def _visit_a(self, elem):
@@ -245,8 +246,9 @@ class crawler(object):
             _curr_word_id = word[0] # get the word_id
             _curr_word = self._revert_word_id[_curr_word_id] # get the word that corresponds to the word_id
 
+            self._doc_index[self._curr_doc_id].add(_curr_word_id)
             self._inverted_index[_curr_word_id].add(self._curr_doc_id)
-            self._resolved_inverted_index[str(_curr_word)].add(self._curr_url)
+            self._resolved_inverted_index[_curr_word].add(self._curr_url)
         # CSC326 Lab 1 - END
 
         #print "    num words="+ str(len(self._curr_words))     # CSC326 Lab 1
@@ -377,6 +379,9 @@ class crawler(object):
                 if socket:
                     socket.close()
 
+    def get_doc_index(self):
+        return dict(self._doc_index)
+
     def get_inverted_index(self):
         return dict(self._inverted_index)
 
@@ -393,4 +398,4 @@ class crawler(object):
 
 if __name__ == "__main__":
     bot = crawler(None, "urls.txt")
-    bot.crawl(depth=0)                                          #CSC326 Lab 1
+    bot.crawl(depth=1)                                          #CSC326 Lab 1
