@@ -1,4 +1,7 @@
 
+# To run this unit test, run the following command in the terminal: 
+# python test_crawler.py
+
 from crawler import crawler
 import unittest
 
