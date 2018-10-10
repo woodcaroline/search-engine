@@ -13,10 +13,9 @@ def parse_user_query(user_query):
     for word in keywords:
         alnum_word = ''.join(character for character in word.lower()
                              if ('a' <= character <= 'z'
-                                 or character == '\''
+                                 or character == "\'"
                                  or '0' <= character <= '9'))
-        if alnum_word.isalnum():
-            alphabetical_keywords.append(alnum_word)
+        alphabetical_keywords.append(alnum_word)
 
     # Find the unique keywords & count the number of times they appear
     unique_keywords = dict()  # Dictionary with key = unique keyword, value = # of appearances
