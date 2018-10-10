@@ -10,24 +10,16 @@ from bottle.bottle import route, run, template, static_file, request
 import search_handler
 
 
-historic_keywords = dict()  # Global variable to store every word searched by the user since server launch
+historic_keywords = dict()  # Global variable to store every word entered by the user since server launch
 
 
 #
 # '/' is the landing page where the search is entered
 #
-@route('/')
-def index():
-    return template('index.html', results=dict(), historic_results=dict())
-
-
-#
-# Receive search query entered by the user, then display results
-#
-@route('/', method='POST')
+@route('/', method='GET')
 def form_handler():
     # Get search query submitted by user
-    query = request.forms.get('keywords')
+    query = request.query.keywords
 
     # Display current & historic results on index page
     unique_keywords = search_handler.parse_user_query(query)
@@ -39,7 +31,7 @@ def form_handler():
 
 
 #
-# Serve static CSS & image files
+# Serve static CSS files
 #
 @route('/<filename:path>')
 def send_static(filename):
@@ -47,6 +39,6 @@ def send_static(filename):
 
 
 #
-# Run the server on localhost:8080
+# Run the server
 #
 run(host='localhost', port=8080, debug=True)
