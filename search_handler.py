@@ -33,51 +33,30 @@ def parse_user_query(user_query):
 
 
 #
-# Store the 20 most searched keywords in one server session
+# Store the most recently searched keywords for each user who logs in
 #
+def retrieve_search_history(new_keywords, user_email, existing_search_history):
 
+    # If user has logged in before
+    if user_email in existing_search_history:
+        # Retrieve user's search history and update as needed
+        list_of_search_history = existing_search_history[user_email]
 
-def most_searched_keywords(new_unique_keywords, existing_historic_keywords):
+        for word in new_keywords:
+            # Add words if we haven't saved 10 most recent yet
+            if len(list_of_search_history) < 10:
+                list_of_search_history.insert(0, word)
 
-    top_20_keywords = dict()  # This function will return the top 20 most searched words (empty for now)
-
-    # First add each new word to the list of all words historically searched
-    for new_word in new_unique_keywords:
-
-        # If keyword is already in table then just update number of occurrences
-        if existing_historic_keywords.get(new_word) is not None:
-            existing_historic_keywords[new_word] += new_unique_keywords.get(new_word)
-
-        # Otherwise add it as a new word
-        else:
-            existing_historic_keywords[new_word] = new_unique_keywords.get(new_word)
-
-    # Now figure out the new top 20 most searched keywords
-
-    # If the number of keywords that have historically been searched is less than 20, just display all of the words
-    if len(existing_historic_keywords) < 20:
-        # Order the top 20 from highest to lowest frequency
-        sorted_historic_keywords = sorted(existing_historic_keywords, key=existing_historic_keywords.get, reverse=True)
-        for word in sorted_historic_keywords:
-            top_20_keywords[word] = existing_historic_keywords.get(word)
-        return top_20_keywords
-    # Otherwise figure out which words are the new top 20
-    else:
-        for existing_word in existing_historic_keywords:
-            # Fill up the top 20 with the first 20 words encountered
-            if len(top_20_keywords) < 20:
-                top_20_keywords[existing_word] = existing_historic_keywords.get(existing_word)
-            # Then replace words in the top 20 as needed
+            # Otherwise if we already have 10 most recent saved, replace oldest word searched
             else:
-                min_count_word = min(top_20_keywords, key=top_20_keywords.get)
-                min_count = top_20_keywords.get(min_count_word)
-                if existing_historic_keywords.get(existing_word) > min_count:
-                    top_20_keywords.pop(min_count_word)
-                    top_20_keywords[existing_word] = existing_historic_keywords.get(existing_word)
+                # Delete oldest word (at 10th/last position)
+                del list_of_search_history[9]
+                # Insert newest word at front of list
+                list_of_search_history.insert(0, word)
 
-    # Order the top 20 from highest to lowest frequency
-    sorted_top_20_keywords = sorted(top_20_keywords, key=top_20_keywords.get, reverse=True)
-    for word in sorted_top_20_keywords:
-        top_20_keywords[word] = existing_historic_keywords.get(word)
+    # Otherwise if this is a new user
+    else:
+        # Create a new empty list that will be filled as the user searches
+        existing_search_history[user_email] = list()
 
-    return top_20_keywords
+    return existing_search_history[user_email]
