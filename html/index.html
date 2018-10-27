@@ -11,6 +11,24 @@
 
 <body>
 
+    %if logged_in:
+        <p align="right">Hello, {{email}}</p>
+
+        <div align="right">
+            <form id="logout" action="/logout" method="GET">
+            <input type="submit" value="Log Out">
+            </form>
+        </div>
+    %end
+
+    %if not logged_in:
+        <div align="right">
+            <form id="login" action="/login" method="GET">
+            <input type="submit" value="Log In">
+            </form>
+        </div>
+    %end
+
     <header>
         <img src="/images/logo-main.png" alt="FoundIt Logo">
     </header>
@@ -24,10 +42,11 @@
 
     <br><br>
 
+    %if logged_in:
     <table align="center">
         <tr class="top">
             <td class="title">Current Search Results</td>
-            <td class="title">Top 20 Search Results</td>
+            <td class="title">Search History</td>
         </tr>
         <tr>
         <td class="left">
@@ -48,18 +67,33 @@
             <table id="history">
                 <tr class="headrow">
                     <td class="headrow">Word</td>
-                    <td class="headrow">Count</td>
                 </tr>
-                %for word, count in historic_results.items():
+                %for word in historic_results:
                     <tr class="bodyrow">
                         <td>{{word}}</td>
-                        <td>{{count}}</td>
                     </tr>
                 %end
             </table>
         </td>
         </tr>
     </table>
+    %end
+
+    %if not logged_in:
+    <p class="title">Current Search Results</p>
+    <table align="center" id=”anon_results”>
+        <tr class="headrow">
+            <td class="headrow">Word</td>
+            <td class="headrow">Count</td>
+        </tr>
+        %for word, count in results.items():
+            <tr class="bodyrow">
+                <td>{{word}}</td>
+                <td>{{count}}</td>
+            </tr>
+        %end
+    </table>
+    %end
 
 </body>
 
