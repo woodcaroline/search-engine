@@ -1,0 +1,83 @@
+
+Preliminary Benchmarking
+
+Using the command: 
+- ab -n 1000 -c 35 http://54.166.117.231:8080/?keywords=google
+
+Maximum number of connections: 1000 requests, 35 concurrent
+Maximum number of requests per second (RPS): 86.55 requests/second
+
+Average response time (latency per request): 404.402 ms
+99 percentile response time (latency per request): 1276 ms
+
+CPU Usage: 12% (8% user and 4% system)
+
+Memory utilization:
+- Used: 68.9MB
+- Buffered: 22.3MB
+- Cached: 254MB
+- Free: 184MB
+
+Disk read/write: 0KB
+IO read/write: 0%
+
+Network utilization:
+- Received: 51KB/s
+- Sent: 249KB/s
+
+-------------------- Output from terminal --------------------
+
+Kingstons-MacBook-Air:~ kingston$ ab -n 1000 -c 35 http://54.166.117.231:8080/?keywords=google
+This is ApacheBench, Version 2.3 <$Revision: 1826891 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 54.166.117.231 (be patient)
+Completed 100 requests
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Completed 600 requests
+Completed 700 requests
+Completed 800 requests
+Completed 900 requests
+Completed 1000 requests
+Finished 1000 requests
+
+
+Server Software:        WSGIServer/0.1
+Server Hostname:        54.166.117.231
+Server Port:            8080
+
+Document Path:          /?keywords=google
+Document Length:        1687 bytes
+
+Concurrency Level:      35
+Time taken for tests:   11.554 seconds
+Complete requests:      1000
+Failed requests:        0
+Total transferred:      1842000 bytes
+HTML transferred:       1687000 bytes
+Requests per second:    86.55 [#/sec] (mean)
+Time per request:       404.402 [ms] (mean)
+Time per request:       11.554 [ms] (mean, across all concurrent requests)
+Transfer rate:          155.68 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:       73  196 135.8    161    1381
+Processing:    65  199 136.5    154    1539
+Waiting:       65  196 135.7    152    1539
+Total:        151  394 196.0    329    1697
+
+Percentage of the requests served within a certain time (ms)
+  50%    329
+  66%    400
+  75%    469
+  80%    505
+  90%    604
+  95%    738
+  98%    968
+  99%   1276
+ 100%   1697 (longest request)
