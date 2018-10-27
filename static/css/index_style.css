@@ -1,11 +1,16 @@
 body {
     background-color: ghostwhite;
     text-align: center;
+    font-family: "Montserrat", Helvetica, sans-serif;
 }
 
 header {
     text-align: center;
     margin: 50px 0 0 0;
+}
+
+p {
+    font-family: "Montserrat", Helvetica, sans-serif;
 }
 
 input[type=text] {
