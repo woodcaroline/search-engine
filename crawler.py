@@ -434,6 +434,14 @@ class crawler(object):
         cur.execute("CREATE TABLE document_index (doc_id integer, url text)")
         cur.executemany("INSERT INTO document_index VALUES (?, ?)", self._revert_doc_id.items())
 
+        # Store page title to persistent storage
+        cur.execute("CREATE TABLE page_title (doc_id integer, title text)")
+        cur.executemany("INSERT INTO page_title VALUES (?, ?)", self._page_title.items())
+
+        # Store page description to persistent storage
+        cur.execute("CREATE TABLE page_description (doc_id integer, description text)")
+        cur.executemany("INSERT INTO page_description VALUES (?, ?)", self._page_description.items())
+
         con.commit()
         con.close()
 
@@ -557,7 +565,7 @@ class crawler(object):
             return sorted_urls
 
         for doc_id in sorted_doc_ids:
-            sorted_urls.append(self._revert_doc_id[doc_id])
+            sorted_urls.append((self._revert_doc_id[doc_id], self._page_title[doc_id], self._page_description[doc_id]))
         return sorted_urls
 
     # Main functions
@@ -586,7 +594,7 @@ class crawler(object):
 
         # sorted_doc_ids --> sorted_urls
         for doc_id in sorted_doc_ids:
-            sorted_urls.append(self._revert_doc_id[doc_id])
+            sorted_urls.append((self._revert_doc_id[doc_id], self._page_title[doc_id], self._page_description[doc_id]))
 
         return sorted_urls
 
@@ -684,7 +692,8 @@ def get_sorted_urls_db(sorted_doc_ids):
 
     for doc_id in sorted_doc_ids:
         printcur = cur.execute("SELECT * FROM document_index WHERE doc_id = '%d'" % doc_id[0])
-        sorted_urls.append(printcur.fetchone()[1])
+        item = printcur.fetchone()
+        sorted_urls.append((item[1], item[2], item[3]))
     return sorted_urls
 
 def get_results_db(word):
@@ -730,7 +739,27 @@ def get_results_db(word):
     # sorted_doc_ids --> sorted_urls
     for doc_id in sorted_doc_ids:
         printcur = cur.execute("SELECT * FROM document_index WHERE doc_id = '%d'" % doc_id[0])
-        sorted_urls.append(printcur.fetchone()[1])
+        url = printcur.fetchone()
+
+        printcur = cur.execute("SELECT * FROM page_title WHERE doc_id = '%d'" % doc_id[0])
+        title = printcur.fetchone()
+
+        printcur = cur.execute("SELECT * FROM page_title WHERE doc_id = '%d'" % doc_id[0])
+        description = printcur.fetchone()
+
+        url = url[1]
+
+        if title is None:
+            title = ""
+        else:
+            title = title[1]
+
+        if description is None:
+            description = ""
+        else:
+            description = description[1]
+
+        sorted_urls.append((url, title, description))
 
     return sorted_urls
 
