@@ -30,7 +30,7 @@
     %end
 
     <header>
-        <img src="/images/logo-main.png" alt="FoundIt Logo">
+        <a href="/"><img src="/images/logo-main.png" alt="FoundIt Logo"></a>
     </header>
 
     <br>
@@ -41,59 +41,6 @@
     </form>
 
     <br><br>
-
-    %if logged_in:
-    <table align="center">
-        <tr class="top">
-            <td class="title">Current Search Results</td>
-            <td class="title">Search History</td>
-        </tr>
-        <tr>
-        <td class="left">
-            <table id=”results”>
-                <tr class="headrow">
-                    <td class="headrow">Word</td>
-                    <td class="headrow">Count</td>
-                </tr>
-                %for word, count in results.items():
-                    <tr class="bodyrow">
-                        <td>{{word}}</td>
-                        <td>{{count}}</td>
-                    </tr>
-                %end
-            </table>
-        </td>
-        <td class="right">
-            <table id="history">
-                <tr class="headrow">
-                    <td class="headrow">Word</td>
-                </tr>
-                %for word in historic_results:
-                    <tr class="bodyrow">
-                        <td>{{word}}</td>
-                    </tr>
-                %end
-            </table>
-        </td>
-        </tr>
-    </table>
-    %end
-
-    %if not logged_in:
-    <p class="title">Current Search Results</p>
-    <table align="center" id=”anon_results”>
-        <tr class="headrow">
-            <td class="headrow">Word</td>
-            <td class="headrow">Count</td>
-        </tr>
-        %for word, count in results.items():
-            <tr class="bodyrow">
-                <td>{{word}}</td>
-                <td>{{count}}</td>
-            </tr>
-        %end
-    </table>
-    %end
 
 </body>
 
