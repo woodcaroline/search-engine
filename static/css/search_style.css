@@ -1,0 +1,99 @@
+header {
+    background-color: ghostwhite;
+    overflow: hidden;
+    min-width: 850px;
+}
+
+body {
+    background-color: white;
+    margin: 0;
+}
+
+input[type=text] {
+    border: 2px solid lightgray;
+    border-radius: 4px;
+    width: 500px;
+    padding: 5px 0 5px 5px;
+}
+
+input[type=text]:focus {
+    border: 2px solid black;
+}
+
+input[type=submit] {
+    font-family: "Montserrat", Helvetica, sans-serif;
+    font-weight: bold;
+    background-color: white;
+    border: 2px solid gray;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 20px 0 0 0;
+}
+
+#logo {
+    margin: 5px;
+}
+
+#search {
+    margin: 5px 0 0 5px;
+}
+
+#log {
+    margin: 5px 10px 0 0;
+}
+
+#userinfo {
+    margin: 10px 10px 0 0;
+    font-size: 12px;
+}
+
+#urls {
+    font-family: "Montserrat", Helvetica, sans-serif;
+    margin: 0 0 0 50px;
+}
+
+p {
+    padding: 0 0 0 50px;
+    font-family: "Montserrat", Helvetica, sans-serif;
+}
+
+td.title {
+    padding: 0 0 5px 0;
+}
+
+td.description {
+    padding: 0 0 20px 0;
+    font-size: 12px;
+}
+
+#history {
+    margin: 0 100px 0 0;
+    font-family: "Montserrat", Helvetica, sans-serif;
+}
+
+.pagination {
+    clear: left;
+    position:absolute;
+    width:100px;
+    height:50px;
+    bottom:50px;
+    right:50%;
+    left:50%;
+}
+
+.pagination button {
+    padding: 10px;
+    text-decoration: none;
+    color: black;
+    border-radius: 4px;
+    border: 2px solid darkgray;
+    font-color: black;
+    font-weight: bold;
+    font-size: 20px;
+    background-color: ghostwhite;
+}
+
+.pagination button:hover {
+    border: 2px solid dimgray;
+    background-color: lightslategray;
+}
