@@ -7,10 +7,11 @@
 #
 
 import bottle
-from bottle import route, run, template, static_file, request
+from bottle import route, run, template, static_file, request, error
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.client import flow_from_clientsecrets
 import httplib2
+import math
 
 
 # ---------------------
@@ -35,6 +36,13 @@ app = SessionMiddleware(bottle.app(), session_opts)
 # Dictionary with key=user_email, value=list containing search history
 search_history = dict()
 
+# Stores search from user
+query = None
+
+# Used for pagination
+page_number = 1
+num_pages = 0
+
 
 # ----------
 # Home page
@@ -52,30 +60,98 @@ def index():
     # Check to see if user is logged in
     if 'email' in session:
         logged_in = 1
+        email = session['email']
+    else:
+        logged_in = 0
+
+    # Process searches from user
+    # --------------------------
+    global query
+    query = request.query.keywords
+
+    # If no search has been made yet, stay on index page
+    if not query:
+        # Logged in users get their info displayed
+        if logged_in:
+            return template('index.html', logged_in=logged_in, email=email)
+
+        # Anonymous users get default page
+        else:
+            return template('index.html', logged_in=logged_in)
+
+    # Once the user searches something, display results on a new page
+    else:
+        bottle.redirect(str('/search'))
+
+
+@route('/search', method="GET")
+def search():
+    # Get the session object from the environ
+    session = request.environ.get('beaker.session')
+
+    # Check to see if user is logged in
+    if 'email' in session:
+        logged_in = 1
+        email = session['email']
     else:
         logged_in = 0
 
     # Process searches from user
     # --------------------------
     import search_handler
-    query = request.query.keywords
+    global query
 
-    # Display current (& historic if logged in) results on index page
-    current_keywords = search_handler.parse_user_query(query)
+    # Retrieve URLs from backend
+    all_urls = [('http://www.google.ca', 'Google', 'A search engine.'),
+                ('http://apple.ca', 'Apple', 'Technology company.'),
+                ('http://twitter.com', 'Twitter', 'A social media site.'),
+                ('http://www.google.ca', 'Google', 'A search engine.'),
+                ('http://apple.ca', 'Apple', 'Technology company.'),
+                ('http://twitter.com', 'Twitter', 'A social media site.'),
+                ]
+    # keyword_to_search = search_handler.parse_user_query(query)
+    # all_urls = crawler.get_results_db(keyword_to_search)
 
-    # Logged in users get search history
+    # Calculate number of pages needed to display these URLs (5 URLs per page)
+    num_urls = len(all_urls)
+    global num_pages
+    num_pages = math.ceil(num_urls / 5)
+
+    # Display the proper 5 URLs based on page number
+    global page_number
+    first_index = ((page_number - 1) * 5) + 1
+    last_index = page_number * 5
+    if last_index > len(all_urls) - 1:
+        last_index = len(all_urls)
+    urls = all_urls[first_index - 1:last_index]
+
     if logged_in:
-
-        global search_history
-        recent_keywords = search_handler.retrieve_search_history(current_keywords, session['email'], search_history)
-
-        return template('index.html', results=current_keywords, historic_results=recent_keywords,
-                        logged_in=logged_in,
-                        email=session['email'])
-
-    # Anonymous users only get current search results
+        recent_searches = search_handler.retrieve_search_history(query, email, search_history)
+        return template('search.html', urls=urls, query=query, search_history=recent_searches,
+                        logged_in=logged_in, email=email)
     else:
-        return template('index.html', results=current_keywords, logged_in=logged_in)
+        return template('search.html', urls=urls, query=query,
+                        logged_in=logged_in)
+
+
+# -------------------------------------------
+# Quick redirect pages to update page number
+# -------------------------------------------
+@route('/prev_page', method="GET")
+def prev_page():
+    global page_number
+    if page_number > 1:
+        page_number = page_number - 1
+    bottle.redirect(str('/search'))
+
+
+@route('/next_page', method="GET")
+def next_page():
+    global page_number
+    global num_pages
+    if page_number < num_pages:
+        page_number = page_number + 1
+    bottle.redirect(str('/search'))
 
 
 # ------------------
@@ -144,6 +220,14 @@ def logout():
     session.delete()
     bottle.redirect(str('/'))
     return
+
+
+# -----------
+# Error page
+# -----------
+@error(404)
+def error404(error):
+    return template("error.html")
 
 
 # -----------------------
