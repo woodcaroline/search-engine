@@ -363,7 +363,7 @@ class crawler(object):
 
                 if top_of_page > 0:
                     page_description += page_text
-                    page_description += "... "
+                    page_description += " | "
                     top_of_page -= 1
                 # CSC326 Lab 3 - END
 
@@ -784,7 +784,7 @@ def get_results_db(word):
         printcur = cur.execute("SELECT * FROM page_title WHERE doc_id = '%d'" % doc_id[0])
         title = printcur.fetchone()
 
-        printcur = cur.execute("SELECT * FROM page_title WHERE doc_id = '%d'" % doc_id[0])
+        printcur = cur.execute("SELECT * FROM page_description WHERE doc_id = '%d'" % doc_id[0])
         description = printcur.fetchone()
 
         url = url[1]
@@ -799,7 +799,7 @@ def get_results_db(word):
         else:
             description = description[1]
 
-        sorted_urls.append((url, title, description))
+        sorted_urls.append((url.encode('ascii', 'ignore'), title.encode('ascii', 'ignore'), description.encode('ascii', 'ignore')))
 
     return sorted_urls
 
