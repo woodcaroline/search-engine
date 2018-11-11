@@ -102,15 +102,9 @@ def search():
     global query
 
     # Retrieve URLs from backend
-    all_urls = [('http://www.google.ca', 'Google', 'A search engine.'),
-                ('http://apple.ca', 'Apple', 'Technology company.'),
-                ('http://twitter.com', 'Twitter', 'A social media site.'),
-                ('http://www.google.ca', 'Google', 'A search engine.'),
-                ('http://apple.ca', 'Apple', 'Technology company.'),
-                ('http://twitter.com', 'Twitter', 'A social media site.'),
-                ]
-    # keyword_to_search = search_handler.parse_user_query(query)
-    # all_urls = crawler.get_results_db(keyword_to_search)
+    import crawler
+    keyword_to_search = search_handler.parse_user_query(query)
+    all_urls = crawler.get_results_db(keyword_to_search)
 
     # Calculate number of pages needed to display these URLs (5 URLs per page)
     num_urls = len(all_urls)
