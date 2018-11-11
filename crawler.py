@@ -178,7 +178,7 @@ class crawler(object):
         self._word_id_cache[word] = word_id
 
         # CSC326 Lab 1 - BEGIN
-        self._revert_word_id[word_id] = str(word)
+        self._revert_word_id[word_id] = word
         # CSC326 Lab 1 - END
 
         return word_id
@@ -196,7 +196,7 @@ class crawler(object):
         self._doc_id_cache[url] = doc_id
 
         # CSC326 Lab 1 - BEGIN
-        self._revert_doc_id[doc_id] = str(url)
+        self._revert_doc_id[doc_id] = url
         # CSC326 Lab 1 - END
 
         return doc_id
@@ -231,7 +231,7 @@ class crawler(object):
         # TODO update document title for document id self._curr_doc_id
 
         # CSC326 Lab 1 - BEGIN
-        self._page_title[self._curr_doc_id] = str(title_text)
+        self._page_title[self._curr_doc_id] = title_text
         # CSC326 Lab 1 - END
 
     def _visit_a(self, elem):
@@ -320,9 +320,10 @@ class crawler(object):
         tag = soup.html
         stack = [DummyTag(), soup.html]
 
-        # CSC326 Lab 1 - BEGIN
-        top_of_page = True # just landed on the web page
-        # CSC326 Lab 1 - END
+        # CSC326 Lab 3 - BEGIN
+        top_of_page = 10 # just landed on the web page
+        page_description = ""
+        # CSC326 Lab 3 - END
 
         while tag and tag.next:
             tag = tag.next
@@ -354,10 +355,26 @@ class crawler(object):
             # text (text, cdata, comments, etc.)
             else:
                 self._add_text(tag)
-                if top_of_page:
-                    top_of_page = False # discovered the first line of text
-                    self._page_description[self._curr_doc_id] = str(tag.string)
-                    # store the first line of the web page
+
+                # CSC326 Lab 3 - BEGIN
+                page_text = self._text_of(tag).strip()
+                if page_text is None or page_text == "":
+                    continue
+
+                if top_of_page > 0:
+                    page_description += page_text
+                    page_description += "... "
+                    top_of_page -= 1
+                # CSC326 Lab 3 - END
+
+        # Remove the character '\u2013' and '\ from each page description
+        #page_description.replace("\u2013", " ")
+        #page_description.replace("\xe8", "")
+
+        # page_description = str(page_description)
+
+        print(page_description)
+        self._page_description[self._curr_doc_id] = str(page_description)
 
     def crawl(self, depth=2, timeout=3):
         """Crawl the web!"""
@@ -516,7 +533,7 @@ class crawler(object):
 
     # word --> word_id
     def get_word_id(self, word):
-        if word is None:
+        if word is None or word not in self._word_id_cache:
             return None
 
         word_id = self._word_id_cache[word]
@@ -541,6 +558,8 @@ class crawler(object):
 
         urls = set(doc_id).intersection(self._url_ranks)
         url_ranks = {i:self._url_ranks[i] for i in urls}
+        url_ranks = url_ranks.items()
+
         return url_ranks
 
     # url_ranks --> sorted_doc_ids
@@ -552,7 +571,7 @@ class crawler(object):
 
         # Sort by decreasing PageRank score
         for doc_id in sorted(url_ranks, key=itemgetter(1)):
-            sorted_doc_ids.append(doc_id)
+            sorted_doc_ids.append(doc_id[0])
 
         sorted_doc_ids.reverse()
         return sorted_doc_ids
@@ -565,7 +584,20 @@ class crawler(object):
             return sorted_urls
 
         for doc_id in sorted_doc_ids:
-            sorted_urls.append((self._revert_doc_id[doc_id], self._page_title[doc_id], self._page_description[doc_id]))
+            url = self._revert_doc_id[doc_id]
+
+            if doc_id in self._page_title:
+                title = self._page_title[doc_id]
+            else:
+                title = ""
+
+            if doc_id in self._page_description:
+                description = self._page_description[doc_id]
+            else:
+                description = ""
+
+            sorted_urls.append((url, title, description))
+
         return sorted_urls
 
     # Main functions
@@ -574,7 +606,7 @@ class crawler(object):
     def get_results(self, word):
         sorted_urls = [ ]
 
-        if word is None:
+        if word is None or word not in self._word_id_cache:
             return sorted_urls
 
         # word --> word_id
@@ -586,15 +618,30 @@ class crawler(object):
         # doc_id --> url_ranks
         urls = set(doc_id).intersection(self._url_ranks)
         url_ranks = {i:self._url_ranks[i] for i in urls}
+        url_ranks = url_ranks.items()
 
         # url_ranks --> sorted_doc_ids
         sorted_doc_ids = [ ]
         for doc_id in sorted(url_ranks, key=itemgetter(1)):
-            sorted_doc_ids.append(doc_id)
+            sorted_doc_ids.append(doc_id[0])
+
+        sorted_doc_ids.reverse()
 
         # sorted_doc_ids --> sorted_urls
         for doc_id in sorted_doc_ids:
-            sorted_urls.append((self._revert_doc_id[doc_id], self._page_title[doc_id], self._page_description[doc_id]))
+            url = self._revert_doc_id[doc_id]
+
+            if doc_id in self._page_title:
+                title = self._page_title[doc_id]
+            else:
+                title = ""
+
+            if doc_id in self._page_description:
+                description = self._page_description[doc_id]
+            else:
+                description = ""
+
+            sorted_urls.append((url, title, description))
 
         return sorted_urls
 
