@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>FoundIt</title>
+    <link rel="stylesheet" href="/css/search_style.css"/>
+    <link rel="icon" type="image/png" href="/images/favicon.png">
+    <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet'>
+
+    <script>
+        function prevPage() {
+            $.ajax({
+                url: "/pagination",
+                type: "POST",
+                data: -1,
+                dataType: script,
+                success: function (data) {
+                    alert('ok');
+                }
+            });
+        }
+
+        function nextPage() {
+            return 2
+        }
+    </script>
+
+</head>
+
+<body>
+
+    <header>
+        <div id="logo" style="float: left">
+            <a href="/"><img src="/images/logo-small.png" alt="FoundIt Logo"></a>
+        </div>
+
+        <div id="search" style="float: left">
+            <form id="keywords" action="/" method="get">
+                <input type="text" name="keywords" placeholder="Search">
+                <input type="submit" value="Search">
+            </form>
+        </div>
+
+
+        <div id="log" style="float: right">
+            %if logged_in:
+                <form id="logout" action="/logout" method="GET">
+                    <input type="submit" value="Log Out">
+                </form>
+            %end
+
+            %if not logged_in:
+                <form id="login" action="/login" method="GET">
+                    <input type="submit" value="Log In">
+                </form>
+            %end
+        </div>
+        <br><br>
+        <div id="userinfo" style="float:right">
+            %if logged_in:
+                <p>Hello, {{email}}</p>
+            %end
+        </div>
+    </header>
+
+    <br>
+
+    <div style="float:left">
+        <p>Search for "{{query}}" returned the following results:</p>
+
+        <table id="urls">
+        %for i in range(len(urls)):
+            %page_info = urls[i]
+            %page_url = page_info[0]
+            %page_name = page_info[1]
+            %page_desc = page_info[2]
+            <tr><td class="title"><a href={{page_url}}>{{page_name}}</a></td></tr>
+            <tr><td class="description">{{page_desc}}</td></tr>
+        %end
+    </table>
+    </div>
+
+    %if logged_in:
+        <div id="history" style="float: right">
+            <p align="center"><b>Recently Searched</b></p>
+            %for search in search_history:
+            <ul style="list-style-type:none">
+                <li>{{search}}</li>
+            </ul>
+            %end
+        </div>
+    %end
+
+    <div class="pagination">
+        <div style="display:inline-block">
+            <form id="prev_page" action="/prev_page" method="get">
+            <button type="submit">&laquo;</button>
+            </form>
+        </div>
+        <div style="display:inline-block">
+            <form id="next_page" action="/next_page" method="get">
+            <button type="submit">&raquo;</button>
+            </form>
+        </div>
+    </div>
+
+</body>
+
+</html>
