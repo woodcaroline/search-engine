@@ -367,14 +367,7 @@ class crawler(object):
                     top_of_page -= 1
                 # CSC326 Lab 3 - END
 
-        # Remove the character '\u2013' and '\ from each page description
-        #page_description.replace("\u2013", " ")
-        #page_description.replace("\xe8", "")
-
-        # page_description = str(page_description)
-
-        print(page_description)
-        self._page_description[self._curr_doc_id] = str(page_description)
+        self._page_description[self._curr_doc_id] = page_description
 
     def crawl(self, depth=2, timeout=3):
         """Crawl the web!"""
