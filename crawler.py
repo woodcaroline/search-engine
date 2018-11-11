@@ -178,7 +178,7 @@ class crawler(object):
         self._word_id_cache[word] = word_id
 
         # CSC326 Lab 1 - BEGIN
-        self._revert_word_id[word_id] = str(word)
+        self._revert_word_id[word_id] = word
         # CSC326 Lab 1 - END
 
         return word_id
@@ -196,7 +196,7 @@ class crawler(object):
         self._doc_id_cache[url] = doc_id
 
         # CSC326 Lab 1 - BEGIN
-        self._revert_doc_id[doc_id] = str(url)
+        self._revert_doc_id[doc_id] = url
         # CSC326 Lab 1 - END
 
         return doc_id
@@ -231,7 +231,7 @@ class crawler(object):
         # TODO update document title for document id self._curr_doc_id
 
         # CSC326 Lab 1 - BEGIN
-        self._page_title[self._curr_doc_id] = str(title_text)
+        self._page_title[self._curr_doc_id] = title_text
         # CSC326 Lab 1 - END
 
     def _visit_a(self, elem):
@@ -320,9 +320,10 @@ class crawler(object):
         tag = soup.html
         stack = [DummyTag(), soup.html]
 
-        # CSC326 Lab 1 - BEGIN
-        top_of_page = True # just landed on the web page
-        # CSC326 Lab 1 - END
+        # CSC326 Lab 3 - BEGIN
+        top_of_page = 10 # just landed on the web page
+        page_description = ""
+        # CSC326 Lab 3 - END
 
         while tag and tag.next:
             tag = tag.next
@@ -354,10 +355,19 @@ class crawler(object):
             # text (text, cdata, comments, etc.)
             else:
                 self._add_text(tag)
-                if top_of_page:
-                    top_of_page = False # discovered the first line of text
-                    self._page_description[self._curr_doc_id] = str(tag.string)
-                    # store the first line of the web page
+
+                # CSC326 Lab 3 - BEGIN
+                page_text = self._text_of(tag).strip()
+                if page_text is None or page_text == "":
+                    continue
+
+                if top_of_page > 0:
+                    page_description += page_text
+                    page_description += " | "
+                    top_of_page -= 1
+                # CSC326 Lab 3 - END
+
+        self._page_description[self._curr_doc_id] = page_description
 
     def crawl(self, depth=2, timeout=3):
         """Crawl the web!"""
@@ -406,6 +416,7 @@ class crawler(object):
         self._links = set(self._links)
         self._links = list(self._links)
 
+        # Run PageRank algorithm
         self._url_ranks = page_rank(self._links)
 
         # Remove dbFile.db if it's in the current directory
@@ -432,6 +443,14 @@ class crawler(object):
         # Store document index to persistent storage
         cur.execute("CREATE TABLE document_index (doc_id integer, url text)")
         cur.executemany("INSERT INTO document_index VALUES (?, ?)", self._revert_doc_id.items())
+
+        # Store page title to persistent storage
+        cur.execute("CREATE TABLE page_title (doc_id integer, title text)")
+        cur.executemany("INSERT INTO page_title VALUES (?, ?)", self._page_title.items())
+
+        # Store page description to persistent storage
+        cur.execute("CREATE TABLE page_description (doc_id integer, description text)")
+        cur.executemany("INSERT INTO page_description VALUES (?, ?)", self._page_description.items())
 
         con.commit()
         con.close()
@@ -464,31 +483,88 @@ class crawler(object):
         links = self._links
         return links
 
+    def get_unsorted_pagerank(self):
+        pagerank = self._url_ranks.items()
+        return pagerank
+
+    def get_sorted_pagerank(self):
+        pagerank = self._url_ranks.items()
+        sorted_pagerank = [ ]
+
+        # Sort by decreasing PageRank score
+        for tuple in sorted(pagerank, key=itemgetter(1)):
+            sorted_pagerank.append(tuple)
+
+        sorted_pagerank.reverse()
+        return sorted_pagerank
+
+    def get_unsorted_pagerank_url(self):
+        pagerank = self._url_ranks.items()
+        unsorted_pagerank = [ ]
+
+        for item in pagerank:
+            temp = list(item)
+            url = self._revert_doc_id[temp[0]]
+            unsorted_pagerank.append((url, temp[1]))
+
+        return unsorted_pagerank
+
+    def get_sorted_pagerank_url(self):
+        pagerank = self._url_ranks.items()
+        sorted_pagerank = [ ]
+
+        # Sort by decreasing PageRank score
+        for item in sorted(pagerank, key=itemgetter(1)):
+            temp = list(item)
+            url = self._revert_doc_id[temp[0]]
+            sorted_pagerank.append((url, temp[1]))
+
+        sorted_pagerank.reverse()
+        return sorted_pagerank
+
     # Helper functions
 
     # word --> word_id
     def get_word_id(self, word):
+        if word is None or word not in self._word_id_cache:
+            return None
+
         word_id = self._word_id_cache[word]
         return word_id
 
     # word_id --> doc_id
     def get_doc_id(self, word_id):
+        doc_id = [ ]
+
+        if word_id is None:
+            return doc_id
+
         doc_id = self._inverted_index[word_id]
         return doc_id
 
     # doc_id --> url_ranks
     def get_url_ranks(self, doc_id):
+        url_ranks = [ ]
+
+        if doc_id is None:
+            return url_ranks
+
         urls = set(doc_id).intersection(self._url_ranks)
         url_ranks = {i:self._url_ranks[i] for i in urls}
+        url_ranks = url_ranks.items()
+
         return url_ranks
 
     # url_ranks --> sorted_doc_ids
     def get_sorted_doc_ids(self, url_ranks):
         sorted_doc_ids = [ ]
 
-        # Sort by descending PageRank score
+        if url_ranks is None:
+            return sorted_doc_ids
+
+        # Sort by decreasing PageRank score
         for doc_id in sorted(url_ranks, key=itemgetter(1)):
-            sorted_doc_ids.append(doc_id)
+            sorted_doc_ids.append(doc_id[0])
 
         sorted_doc_ids.reverse()
         return sorted_doc_ids
@@ -496,14 +572,36 @@ class crawler(object):
     # sorted_doc_ids --> sorted_urls
     def get_sorted_urls(self, sorted_doc_ids):
         sorted_urls = [ ]
+
+        if sorted_doc_ids is None:
+            return sorted_urls
+
         for doc_id in sorted_doc_ids:
-            sorted_urls.append(self._revert_doc_id[doc_id])
+            url = self._revert_doc_id[doc_id]
+
+            if doc_id in self._page_title:
+                title = self._page_title[doc_id]
+            else:
+                title = ""
+
+            if doc_id in self._page_description:
+                description = self._page_description[doc_id]
+            else:
+                description = ""
+
+            sorted_urls.append((url, title, description))
+
         return sorted_urls
 
     # Main functions
     # Combining all helper functions into one
 
     def get_results(self, word):
+        sorted_urls = [ ]
+
+        if word is None or word not in self._word_id_cache:
+            return sorted_urls
+
         # word --> word_id
         word_id = self._word_id_cache[word]
 
@@ -513,16 +611,30 @@ class crawler(object):
         # doc_id --> url_ranks
         urls = set(doc_id).intersection(self._url_ranks)
         url_ranks = {i:self._url_ranks[i] for i in urls}
+        url_ranks = url_ranks.items()
 
         # url_ranks --> sorted_doc_ids
         sorted_doc_ids = [ ]
         for doc_id in sorted(url_ranks, key=itemgetter(1)):
-            sorted_doc_ids.append(doc_id)
+            sorted_doc_ids.append(doc_id[0])
+
+        sorted_doc_ids.reverse()
 
         # sorted_doc_ids --> sorted_urls
-        sorted_urls = [ ]
         for doc_id in sorted_doc_ids:
-            sorted_urls.append(self._revert_doc_id[doc_id])
+            url = self._revert_doc_id[doc_id]
+
+            if doc_id in self._page_title:
+                title = self._page_title[doc_id]
+            else:
+                title = ""
+
+            if doc_id in self._page_description:
+                description = self._page_description[doc_id]
+            else:
+                description = ""
+
+            sorted_urls.append((url, title, description))
 
         return sorted_urls
 
@@ -534,15 +646,27 @@ class crawler(object):
 
 # word --> word_id
 def get_word_id_db(word):
+    if word is None:
+        return None
+
     con = sqlite3.connect('dbFile.db')
     cur = con.cursor()
 
     printcur = cur.execute("SELECT * FROM lexicon WHERE word = '%s'" % word)
-    word_id = printcur.fetchone()[1]
+    word_id = printcur.fetchone()
+    if word_id is None:
+        return None
+    word_id = word_id[1]
+
     return word_id
 
 # word_id --> doc_id
 def get_doc_id_db(word_id):
+    doc_id = [ ]
+
+    if word_id is None:
+        return doc_id
+
     con = sqlite3.connect('dbFile.db')
     cur = con.cursor()
 
@@ -562,10 +686,14 @@ def get_doc_id_db(word_id):
 
 # doc_id --> url_ranks
 def get_url_ranks_db(doc_id):
+    url_ranks = [ ]
+
+    if doc_id is None:
+        return url_ranks
+
     con = sqlite3.connect('dbFile.db')
     cur = con.cursor()
 
-    url_ranks = [ ]
     for doc in doc_id:
         printcur = cur.execute("SELECT * FROM PageRank WHERE doc_id = '%d'" % doc)
         pair = printcur.fetchone()
@@ -578,6 +706,9 @@ def get_url_ranks_db(doc_id):
 def get_sorted_doc_ids_db(url_ranks):
     sorted_doc_ids = [ ]
 
+    if url_ranks is None:
+        return sorted_doc_ids
+
     # Sort by descending PageRank score
     for doc_id in sorted(url_ranks, key=itemgetter(1)):
         sorted_doc_ids.append(doc_id)
@@ -587,22 +718,37 @@ def get_sorted_doc_ids_db(url_ranks):
 
 # sorted_doc_ids --> sorted_urls
 def get_sorted_urls_db(sorted_doc_ids):
+    sorted_urls = [ ]
+
+    if sorted_doc_ids is None:
+        return sorted_urls
+
     con = sqlite3.connect('dbFile.db')
     cur = con.cursor()
 
     sorted_urls = [ ]
+    if sorted_doc_ids is None:
+        return sorted_urls
+
     for doc_id in sorted_doc_ids:
         printcur = cur.execute("SELECT * FROM document_index WHERE doc_id = '%d'" % doc_id[0])
-        sorted_urls.append(printcur.fetchone()[1])
+        item = printcur.fetchone()
+        sorted_urls.append((item[1], item[2], item[3]))
     return sorted_urls
 
 def get_results_db(word):
+
     con = sqlite3.connect('dbFile.db')
     cur = con.cursor()
 
+    sorted_urls = [ ]
+
     # word --> word_id
     printcur = cur.execute("SELECT * FROM lexicon WHERE word = '%s'" % word)
-    word_id = printcur.fetchone()[1]
+    word_id = printcur.fetchone()
+    if word_id is None:
+        return sorted_urls
+    word_id = word_id[1]
 
     # word_id --> doc_id
     printcur = cur.execute("SELECT * FROM inverted_index WHERE word_id = '%d'" % word_id)
@@ -631,10 +777,29 @@ def get_results_db(word):
     sorted_doc_ids.reverse()
 
     # sorted_doc_ids --> sorted_urls
-    sorted_urls = [ ]
     for doc_id in sorted_doc_ids:
-            printcur = cur.execute("SELECT * FROM document_index WHERE doc_id = '%d'" % doc_id[0])
-            sorted_urls.append(printcur.fetchone()[1])
+        printcur = cur.execute("SELECT * FROM document_index WHERE doc_id = '%d'" % doc_id[0])
+        url = printcur.fetchone()
+
+        printcur = cur.execute("SELECT * FROM page_title WHERE doc_id = '%d'" % doc_id[0])
+        title = printcur.fetchone()
+
+        printcur = cur.execute("SELECT * FROM page_description WHERE doc_id = '%d'" % doc_id[0])
+        description = printcur.fetchone()
+
+        url = url[1]
+
+        if title is None:
+            title = ""
+        else:
+            title = title[1]
+
+        if description is None:
+            description = ""
+        else:
+            description = description[1]
+
+        sorted_urls.append((url.encode('ascii', 'ignore'), title.encode('ascii', 'ignore'), description.encode('ascii', 'ignore')))
 
     return sorted_urls
 
