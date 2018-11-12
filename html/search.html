@@ -47,7 +47,7 @@
 
     <br>
 
-    <div style="float:left">
+    <div class="urls">
         <p>Search for "{{query}}" returned the following results:</p>
 
         <table id="urls">
@@ -63,7 +63,7 @@
     </div>
 
     %if logged_in:
-        <div id="history" style="float: right">
+        <div id="history">
             <p align="center"><b>Recently Searched</b></p>
             %for search in search_history:
             <ul style="list-style-type:none">
