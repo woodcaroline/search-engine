@@ -1,12 +1,19 @@
 # search-engine
 Search engine for CSC326.
 
-# Server Information
+# Server Information (for Lab 2)
 Public IP Address: 54.166.117.231
 
 To access the search engine, go to:
 - http://54.166.117.231:8080, or alternatively,
 - http://ec2-54-166-117-231.compute-1.amazonaws.com:8080
+
+# Server Information (for Lab 3)
+Public IP Address: 23.22.70.105
+
+To access the search engine, go to:
+- http://23.22.70.105:8080, or alternatively,
+- http://ec2-23-22-70-105.compute-1.amazonaws.com:8080
 
 To start a new instance on AWS, run:
 - python start_instance.py
@@ -14,7 +21,7 @@ To start a new instance on AWS, run:
 To terminate an instance, run:
 - python stop_instance.py
 
-# Benchmarking (for both Lab 2 and Lab 3)
+# Benchmarking (for Lab 2)
 
 To monitoring application performance, run:
 - ab -n 1000 -c 35 http://54.166.117.231:8080/?keywords=google
@@ -22,6 +29,15 @@ To monitoring application performance, run:
 To monitoring resource utilization, run:
 - dstat -c -m -d -r -n
 - ab -n 1000 -c 35 http://54.166.117.231:8080/?keywords=google
+
+# Benchmarking (for Lab 3)
+
+To monitoring application performance, run:
+- ab -n 1000 -c 35 http://23.22.70.105:8080/?keywords=google
+
+To monitoring resource utilization, run:
+- dstat -c -m -d -r -n
+- ab -n 1000 -c 35 http://23.22.70.105:8080/?keywords=google
 
 See RESULT.txt for benchmark result
 
