@@ -52,6 +52,18 @@ input[type=submit] {
     margin: 0 0 0 50px;
 }
 
+.urls {
+    display: inline-block;
+    max-width: 60%;
+}
+
+#history {
+    display: inline-block;
+    vertical-align: top;
+    max-width: 40%;
+    float: right;
+}
+
 p {
     padding: 0 0 0 50px;
     font-family: "Montserrat", Helvetica, sans-serif;
