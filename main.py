@@ -66,6 +66,10 @@ def index():
 
     # Process searches from user
     # --------------------------
+    # Reset page number
+    global page_number
+    page_number = 1
+    # Get search query
     global query
     query = request.query.keywords
 
