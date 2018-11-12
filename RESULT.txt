@@ -6,8 +6,13 @@ IMPORTANT: if you are looking for Lab 2 benchmark results, look below the result
 -------------------- Comparing Benchmark Results --------------------
 
 To compare the relative performance of Lab 2 and Lab 3, we ran: 
-- dstat -c -m -d -r -n (on the remote AWS instance)
-- ab -n 1000 -c 35 http://54.166.117.231:8080/?keywords=google (on our own machine)
+
+On ubuntu@54.166.117.231 (Lab 2) or ubuntu@23.22.70.105 (Lab 3): 
+- dstat -c -m -d -r -n
+
+On our computer: 
+- ab -n 1000 -c 35 http://54.166.117.231:8080/?keywords=google (for Lab 2)
+- ab -n 1000 -c 35 http://23.22.70.105:8080/?keywords=google (for Lab 3)
 
 With the same number of requests (35 concurrent and 1000 total), Lab 3 performed worse than Lab 2. The maximum number of requests per second, average response time and 99 percentile response time all increased over Lab 2. The reason is that Lab 3 involves accessing the disk, which is a very slow operation compared to accessing the memory/cache for Lab 2. 
 
@@ -16,7 +21,7 @@ For resource utilization, the two labs performed roughly the same. Lab 3 stores 
 -------------------- Lab 3 Benchmark Results --------------------
 
 Using the command: 
-- ab -n 1000 -c 35 http://54.166.117.231:8080/?keywords=google
+- ab -n 1000 -c 35 http://23.22.70.105:8080/?keywords=google
 
 Maximum number of connections: 1000 requests, 35 concurrent
 Maximum number of requests per second (RPS): 71.22 requests/second
@@ -27,10 +32,10 @@ Average response time (latency per request): 491.455 ms
 CPU Usage: 18% (15% user and 3% system)
 
 Memory utilization:
-- Used: 117MB
-- Buffered: 29.0MB
-- Cached: 276MB
-- Free: 110MB
+- Used: 88.1MB
+- Buffered: 50.0MB
+- Cached: 262MB
+- Free: 132MB
 
 Disk read/write: 0KB/2140KB
 IO read/write: 0%/50.0%
@@ -41,12 +46,12 @@ Network utilization:
 
 -------------------- Output from terminal --------------------
 
-Kingstons-MacBook-Air:~ kingston$ ab -n 1000 -c 35 http://54.166.117.231:8080/?keywords=google
+Kingstons-MacBook-Air:~ kingston$ ab -n 1000 -c 35 http://23.22.70.105:8080/?keywords=google
 This is ApacheBench, Version 2.3 <$Revision: 1826891 $>
 Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
 Licensed to The Apache Software Foundation, http://www.apache.org/
 
-Benchmarking 54.166.117.231 (be patient)
+Benchmarking 23.22.70.105 (be patient)
 Completed 100 requests
 Completed 200 requests
 Completed 300 requests
@@ -61,7 +66,7 @@ Finished 1000 requests
 
 
 Server Software:        WSGIServer/0.1
-Server Hostname:        54.166.117.231
+Server Hostname:        23.22.70.105
 Server Port:            8080
 
 Document Path:          /?keywords=google
