@@ -7,16 +7,26 @@
     <link rel="stylesheet" href="/css/index_style.css"/>
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet'>
+
+    <script>
+        function background_color(color) {
+            document.getElementById("body").style.backgroundColor = color;
+            document.getElementById("body").style.backgroundImage = "";
+        }
+        function background_image(image) {
+            document.getElementById("body").style.backgroundImage = 'url(images/' + image + '.png)';
+        }
+    </script>
 </head>
 
-<body>
+<body id="body">
 
     %if logged_in:
         <p align="right">Hello, {{email}}</p>
 
         <div align="right">
             <form id="logout" action="/logout" method="GET">
-            <input type="submit" value="Log Out">
+            <input type="submit" value="Log Out" style = "padding: 10px 20px">
             </form>
         </div>
     %end
@@ -24,23 +34,50 @@
     %if not logged_in:
         <div align="right">
             <form id="login" action="/login" method="GET">
-            <input type="submit" value="Log In">
+            <input type="submit" value="Log In" style = "padding: 10px 20px">
             </form>
         </div>
     %end
 
     <header>
-        <a href="/"><img src="/images/logo-main.png" alt="FoundIt Logo"></a>
+        <a href="/"><img src="/images/logo-main.gif" alt="FoundIt Logo"></a>
     </header>
 
     <br>
 
     <form id="keywords" action="/" method="get">
-        <input type="text" name="keywords" placeholder="Search"></br>
-        <input type="submit" value="Search" style = "padding: 10px 20px">
+        %if logged_in:
+            <input type="text" name="keywords" placeholder="Search"></br>
+            %if search_history:
+            <div id="searchhistory">
+                %for search in search_history:
+                    %if search is not "":
+                    <ul>
+                        <a href="/search?keywords={{search}}"><li>{{search}}</li></a>
+                    </ul>
+                    %end
+                %end
+            </div><br>
+            %end
+            <input type="submit" value="Search" style = "padding: 10px 20px">
+        %end
+        %if not logged_in:
+            <input type="text" name="keywords" placeholder="Search"></br>
+            <input type="submit" value="Search" style = "padding: 10px 20px">
+        %end
     </form>
 
     <br><br>
+
+    <div id="themes">
+        <p>Themes</p>
+        <button type="button" onclick="background_color('ghostwhite');" id="blue-theme"></button>
+        <button type="button" onclick="background_image('earth-theme');" id="earth-theme"></button>
+        <button type="button" onclick="background_image('forest-theme');" id="forest-theme"></button>
+        <button type="button" onclick="background_image('tree-theme');" id="tree-theme"></button>
+        <button type="button" onclick="background_image('sunset-theme');" id="sunset-theme"></button>
+
+    </div>
 
 </body>
 
