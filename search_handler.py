@@ -1,6 +1,6 @@
 #
 # Parse a string entered by the user into keywords
-# (Modified for Lab 3)
+# (Modified for Lab 4)
 #
 
 
@@ -18,12 +18,12 @@ def parse_user_query(user_query):
                                  or '0' <= character <= '9'))
         alphabetical_keywords.append(alnum_word)
 
-    # Return the first keyword to search against it
-    return alphabetical_keywords[0]
+    # Return the keywords to search against
+    return alphabetical_keywords
 
 
 #
-# Store the most recently searched keywords for each user who logs in
+# Store the most recently searched queries for each user who logs in
 #
 def retrieve_search_history(new_search, user_email, existing_search_history):
 
@@ -35,14 +35,14 @@ def retrieve_search_history(new_search, user_email, existing_search_history):
         # Retrieve user's search history and update as needed
         list_of_search_history = existing_search_history[user_email]
 
-        # Add query if we haven't saved 10 most recent yet
-        if len(list_of_search_history) < 10:
+        # Add query if we haven't saved 5 most recent yet
+        if len(list_of_search_history) < 5:
             list_of_search_history.insert(0, new_search)
 
-        # Otherwise if we already have 10 most recent saved, replace oldest query searched
+        # Otherwise if we already have 5 most recent saved, replace oldest query searched
         else:
-            # Delete oldest word (at 10th/last position)
-            del list_of_search_history[9]
+            # Delete oldest word (at 5th/last position)
+            del list_of_search_history[4]
             # Insert newest word at front of list
             list_of_search_history.insert(0, new_search)
 
