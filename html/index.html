@@ -45,7 +45,7 @@
 
     <br>
 
-    <form id="keywords" action="/" method="get">
+    <form id="keywords" autocomplete="off" action="/" method="get">
         %if logged_in:
             <input type="text" name="keywords" placeholder="Search"></br>
             %if search_history:
