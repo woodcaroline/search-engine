@@ -23,7 +23,7 @@
         </div>
 
         <div id="search">
-             <form id="keywords" action="/search" method="get">
+             <form id="keywords" autocomplete="off" action="/search" method="get">
                 <input type="text" name="keywords" placeholder="Search">
                 <input type="submit" value="Search">
                 %if logged_in:
