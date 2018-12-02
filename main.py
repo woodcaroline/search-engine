@@ -12,6 +12,9 @@ from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.client import flow_from_clientsecrets
 import httplib2
 import math
+from math import *
+from autocorrect import spell
+import search_handler
 
 
 # ---------------------
@@ -38,6 +41,7 @@ search_history = dict()
 
 # Stores search from user
 query = None
+redirected = False
 
 # Used for pagination
 page_number = 1
@@ -77,7 +81,8 @@ def index():
     if not query:
         # Logged in users get their info displayed
         if logged_in:
-            return template('index.html', logged_in=logged_in, email=email)
+            recent_searches = search_handler.retrieve_search_history(query, email, search_history)
+            return template('index.html', logged_in=logged_in, email=email, search_history=recent_searches)
 
         # Anonymous users get default page
         else:
@@ -85,6 +90,8 @@ def index():
 
     # Once the user searches something, display results on a new page
     else:
+        global redirected
+        redirected = True
         bottle.redirect(str('/search'))
 
 
@@ -102,13 +109,45 @@ def search():
 
     # Process searches from user
     # --------------------------
-    import search_handler
     global query
+    global redirected
+    if not redirected:
+        query = request.query.keywords
+    redirected = False
+
+    # -----
+
+    # Spell check using Autocorrect library
+    suggestion = list()  # List of suggested words based on user query
+    for word in query.split():
+        suggestion.append(spell(word))
+
+    suggestion = ' '.join(word for word in suggestion)  # Convert to a string
+
+    # If query was spelled correctly, don't try and suggest an alternative
+    if query == suggestion:
+        suggestion = None
+
+    # -----
+
+    # Evaluate mathematical expressions if detected
+    math_result = 0
+    if ("+" or "-" or "/" or "*" or "^" or "(" or ")" in query) or (any(char.isdigit() for char in query)):
+        math_expr = True
+        try:
+            math_result = eval(query, {'sqrt': sqrt, 'pi': pi, 'log': log10, 'ln': log2,
+                                       'sin': sin, 'cos': cos, 'tan': tan,
+                                       'arcsin': asin, 'arccos': acos, 'arctan': atan,
+                                       'e': e})
+        except:
+            math_expr = False
+
+    # ------
 
     # Retrieve URLs from backend
     import crawler
     keyword_to_search = search_handler.parse_user_query(query)
-    all_urls = crawler.get_results_db(keyword_to_search)
+    all_urls = crawler.get_results_db_multi(keyword_to_search)
 
     # Calculate number of pages needed to display these URLs (5 URLs per page)
     num_urls = len(all_urls)
@@ -126,9 +165,11 @@ def search():
     if logged_in:
         recent_searches = search_handler.retrieve_search_history(query, email, search_history)
         return template('search.html', urls=urls, query=query, search_history=recent_searches,
+                        suggestion=suggestion, math_expr=math_expr, math_result=math_result,
                         logged_in=logged_in, email=email)
     else:
         return template('search.html', urls=urls, query=query,
+                        suggestion=suggestion, math_expr=math_expr, math_result=math_result,
                         logged_in=logged_in)
 
 
