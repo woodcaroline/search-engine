@@ -7,28 +7,45 @@
     <link rel="stylesheet" href="/css/search_style.css"/>
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet'>
+
+    <script type="text/javascript">
+            //document.getElementById("query").onkeyup = function() {
+                //window.alert("hello");
+            //}
+    </script>
 </head>
 
 <body>
 
     <header>
-        <div id="logo" style="float: left">
+        <div id="logo">
             <a href="/"><img src="/images/logo-small.png" alt="FoundIt Logo"></a>
         </div>
 
-        <div id="search" style="float: left">
-            <form id="keywords" action="/" method="get">
+        <div id="search">
+             <form id="keywords" action="/search" method="get">
                 <input type="text" name="keywords" placeholder="Search">
                 <input type="submit" value="Search">
-            </form>
+                %if logged_in:
+                    %if search_history:
+                        <ul id="searchhistory">
+                            %for search in search_history:
+                                %if search is not "":
+                                    <a href="/?keywords={{search}}"><li>{{search}}</li></a>
+                                %end
+                            %end
+                        </ul>
+                    %end
+                 %end
+             </form>
         </div>
 
-
-        <div id="log" style="float: right">
+        <div id="log">
             %if logged_in:
                 <form id="logout" action="/logout" method="GET">
                     <input type="submit" value="Log Out">
                 </form>
+                <p id="userinfo">Hello, {{email}}</p>
             %end
 
             %if not logged_in:
@@ -37,15 +54,18 @@
                 </form>
             %end
         </div>
-        <br><br>
-        <div id="userinfo" style="float:right">
-            %if logged_in:
-                <p>Hello, {{email}}</p>
-            %end
-        </div>
+
     </header>
 
     <br>
+
+    %if suggestion is not None and math_expr is False:
+        <p><i>Did you mean: <a href="/?keywords={{suggestion}}">{{suggestion}}</a>?</i></p>
+    %end
+
+    %if math_expr:
+        <p id="math" style="display:inline-block">{{query}} = {{math_result}}</p><br>
+    %end
 
     <div class="urls">
         <p>Search for "{{query}}" returned the following results:</p>
@@ -64,17 +84,6 @@
         %end
     </table>
     </div>
-
-    %if logged_in:
-        <div id="history">
-            <p align="center"><b>Recently Searched</b></p>
-            %for search in search_history:
-            <ul style="list-style-type:none">
-                <li>{{search}}</li>
-            </ul>
-            %end
-        </div>
-    %end
 
     <div class="pagination">
         <div style="display:inline-block">
