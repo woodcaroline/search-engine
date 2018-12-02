@@ -2,6 +2,11 @@ header {
     background-color: ghostwhite;
     overflow: hidden;
     min-width: 850px;
+    font-family: "Montserrat", Helvetica, sans-serif;
+}
+
+header div {
+    display: inline-block;
 }
 
 body {
@@ -10,28 +15,36 @@ body {
 }
 
 input[type=text] {
-    border: 2px solid lightgray;
-    border-radius: 4px;
     width: 500px;
     padding: 5px 0 5px 5px;
+    border: 1px solid lightgray;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 input[type=text]:focus {
-    border: 2px solid black;
+    border: 1px solid gray;
 }
 
 input[type=submit] {
     font-family: "Montserrat", Helvetica, sans-serif;
     font-weight: bold;
     background-color: white;
-    border: 2px solid gray;
-    border-radius: 4px;
+    color: gray;
+    background-color: gainsboro;
+    border: none;
     cursor: pointer;
     margin: 20px 0 0 0;
+    padding: 5px;
+}
+
+input[type=submit]:hover {
+    border: 1px gray;
+    color: black;
 }
 
 #logo {
     margin: 5px;
+    vertical-align: top;
 }
 
 #search {
@@ -40,10 +53,13 @@ input[type=submit] {
 
 #log {
     margin: 5px 10px 0 0;
+    vertical-align: top;
+    text-align: right;
+    right: 0;
+    position: absolute;
 }
 
 #userinfo {
-    margin: 10px 10px 0 0;
     font-size: 12px;
 }
 
@@ -62,6 +78,13 @@ input[type=submit] {
     vertical-align: top;
     max-width: 40%;
     float: right;
+}
+
+#math {
+    border: 1px solid gainsboro;
+    padding: 15px;
+    margin: 20px 0 20px 50px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 p {
@@ -108,4 +131,46 @@ td.description {
 .pagination button:hover {
     border: 2px solid dimgray;
     background-color: lightslategray;
+}
+
+#searchhistory {
+    display: none;
+    border-left:1px solid gainsboro;
+    border-right:1px solid gainsboro;
+    border-bottom:1px solid gainsboro;
+    width: 500px;
+    padding: 5px 0 5px 5px;
+    background-color: white;
+    margin: 0 0 10px 0;
+}
+
+input[type=text]:focus ~ #searchhistory {
+    display: block;
+}
+
+#searchhistory:hover {
+    display: block;
+}
+
+ul {
+    padding:0;
+    margin:0;
+    list-style-type:none;
+}
+
+li {
+    padding:3px;
+    margin:0;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: left;
+    color:#551A8B;
+}
+
+a {
+    text-decoration: none;
+}
+
+li:hover{
+    background-color:#F2F2F2;
 }
