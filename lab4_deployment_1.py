@@ -6,6 +6,7 @@
 
 import os
 import csv
+import time
 import boto.ec2
 import paramiko
 
@@ -76,8 +77,9 @@ if __name__ == "__main__":
     print('Instance started!')
 
     # check_instance_status
-    while instance.state != 'running':
-        sleep(1)
+    while instance.state == 'pending':
+        time.sleep(5)
+        instance = reservation_instance.instances[0]
 
     # allocate_associate_Elastic_IP_address
     address = connection.allocate_address()
