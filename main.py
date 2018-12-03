@@ -181,6 +181,8 @@ def prev_page():
     global page_number
     if page_number > 1:
         page_number = page_number - 1
+    global redirected
+    redirected = True
     bottle.redirect(str('/search'))
 
 
@@ -190,6 +192,8 @@ def next_page():
     global num_pages
     if page_number < num_pages:
         page_number = page_number + 1
+    global redirected
+    redirected = True
     bottle.redirect(str('/search'))
 
 
