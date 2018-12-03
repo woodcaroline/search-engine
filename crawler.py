@@ -37,10 +37,10 @@ from operator import itemgetter
 # CSC326 Lab 4 - BEGIN
 import time
 
-TITLE_KEYWORD_SCORE = 5000
-WORD_SCALING_FACTOR = 0
-MULTI_KEYWORD_SCORE = 0.1
-VISIT_SCORE = 1.1
+KEYWORD_SCORE_SCALING_FACTOR = 0.00001
+MULTI_WORD_MATCHED_BONUS = 0.1
+FREQUENTLY_SEARCHED_BONUS = 1.1
+TITLE_FONT_SIZE = 100
 # CSC326 Lab 4 - END
 
 def attr(elem, attr):
@@ -87,9 +87,6 @@ class crawler(object):
         # CSC326 Lab 3 - END
 
         # CSC326 Lab 4 - BEGIN
-        self._word_count = { }
-        self._sorted_word_count = [ ]
-
         self._search_word_relevance = defaultdict(dict)
         # CSC326 Lab 4 - END
 
@@ -256,7 +253,7 @@ class crawler(object):
             word = word.strip()
             if word in self._ignored_words:
                 continue
-            self._curr_words.append((self.word_id(word), TITLE_KEYWORD_SCORE))
+            self._curr_words.append((self.word_id(word), TITLE_FONT_SIZE))
         # CSC326 Lab 4 - END
 
     def _visit_a(self, elem):
@@ -298,15 +295,10 @@ class crawler(object):
         # CSC326 Lab 3 - END
 
         # CSC326 Lab 4 - BEGIN
-            if _curr_word in self._word_count:
-                self._word_count[_curr_word] += 1
-            else:
-                self._word_count[_curr_word] = 1
-
             if _curr_word in self._search_word_relevance and self._curr_doc_id in self._search_word_relevance[_curr_word]:
-                self._search_word_relevance[_curr_word][self._curr_doc_id] += word[1]
+                self._search_word_relevance[_curr_word][self._curr_doc_id] += (word[1] ** 2)
             else:
-                self._search_word_relevance[_curr_word][self._curr_doc_id] = word[1]
+                self._search_word_relevance[_curr_word][self._curr_doc_id] = (word[1] ** 2)
         # CSC326 Lab 4 - END
 
         #print "    num words="+ str(len(self._curr_words))     # CSC326 Lab 1
@@ -456,13 +448,13 @@ class crawler(object):
         # Run PageRank algorithm
         self._url_ranks = page_rank(self._links)
 
-        # Remove dbFile_1.db if it's in the current directory
+        # Remove lab3_database.db if it's in the current directory
         try:
-            os.remove('dbFile_1.db')
+            os.remove('lab3_database.db')
         except:
             pass
 
-        con = sqlite3.connect('dbFile_1.db')
+        con = sqlite3.connect('lab3_database.db')
         cur = con.cursor()
 
         # Store lexicon to persistent storage
@@ -489,27 +481,20 @@ class crawler(object):
         cur.execute("CREATE TABLE page_description (doc_id integer, description text)")
         cur.executemany("INSERT INTO page_description VALUES (?, ?)", self._page_description.items())
 
+        con.commit()
+        con.close()
+
         # CSC326 Lab 3 - END
 
         # CSC326 Lab 4 - BEGIN
 
-        for word_count in sorted(self._word_count.items(), key=itemgetter(1)):
-            self._sorted_word_count.append(word_count)
-
-        # Store word counts to persistent storage
-        cur.execute("CREATE TABLE word_count (word text, word_count integer)")
-        cur.executemany("INSERT INTO word_count VALUES (?, ?)", self._sorted_word_count)
-
-        con.commit()
-        con.close()
-
-        # Remove dbFile_2.db if it's in the current directory
+        # Remove lab4_database.db if it's in the current directory
         try:
-            os.remove('dbFile_2.db')
+            os.remove('lab4_database.db')
         except:
             pass
 
-        con = sqlite3.connect('dbFile_2.db')
+        con = sqlite3.connect('lab4_database.db')
         cur = con.cursor()
 
         sorted_urls = [ ]
@@ -529,20 +514,24 @@ class crawler(object):
                 url_rank = self._url_ranks[doc_id]
 
                 if doc_id in self._page_title:
-                    title = self._page_title[doc_id][:150].rsplit(' ', 1)[0] + '...'
+                    title = self._page_title[doc_id][:250].rsplit(' ', 1)[0] + '...'
                 else:
                     title = ""
 
                 if doc_id in self._page_description:
-                    description = self._page_description[doc_id][:150].rsplit(' ', 1)[0] + '...'
+                    description = self._page_description[doc_id][:250].rsplit(' ', 1)[0] + '...'
                 else:
                     description = ""
 
+                print((doc_id, url_rank))
+
                 if word in self._search_word_relevance and doc_id in self._search_word_relevance[word]:
-                    url_rank += 0.0001 * self._search_word_relevance[word][doc_id]
+                    url_rank += (KEYWORD_SCORE_SCALING_FACTOR * self._search_word_relevance[word][doc_id])
 
                 sorted_urls.append((word, url, title, description, url_rank))
                 sorted_urls_lite.append((word, doc_id, url_rank))
+
+                print((doc_id, url_rank))
 
         cur.execute("CREATE TABLE search_results (word text, url text, title text, description text, PageRank real)")
         cur.executemany("INSERT INTO search_results VALUES (?, ?, ?, ?, ?)", sorted_urls)
@@ -556,12 +545,12 @@ class crawler(object):
             url = self._revert_doc_id[doc_id]
 
             if doc_id in self._page_title:
-                title = self._page_title[doc_id][:150].rsplit(' ', 1)[0] + '...'
+                title = self._page_title[doc_id][:250].rsplit(' ', 1)[0] + '...'
             else:
                 title = ""
 
             if doc_id in self._page_description:
-                description = self._page_description[doc_id][:150].rsplit(' ', 1)[0] + '...'
+                description = self._page_description[doc_id][:250].rsplit(' ', 1)[0] + '...'
             else:
                 description = ""
 
@@ -767,7 +756,7 @@ def get_word_id_db(word):
     if word is None:
         return None
 
-    con = sqlite3.connect('dbFile_1.db')
+    con = sqlite3.connect('lab3_database.db')
     cur = con.cursor()
 
     printcur = cur.execute("SELECT * FROM lexicon WHERE word = '%s'" % word)
@@ -788,7 +777,7 @@ def get_doc_id_db(word_id):
     if word_id is None:
         return doc_id
 
-    con = sqlite3.connect('dbFile_1.db')
+    con = sqlite3.connect('lab3_database.db')
     cur = con.cursor()
 
     printcur = cur.execute("SELECT * FROM inverted_index WHERE word_id = '%d'" % word_id)
@@ -814,7 +803,7 @@ def get_url_ranks_db(doc_id):
     if doc_id is None:
         return url_ranks
 
-    con = sqlite3.connect('dbFile_1.db')
+    con = sqlite3.connect('lab3_database.db')
     cur = con.cursor()
 
     for doc in doc_id:
@@ -848,7 +837,7 @@ def get_sorted_urls_db(sorted_doc_ids):
     if sorted_doc_ids is None:
         return sorted_urls
 
-    con = sqlite3.connect('dbFile_1.db')
+    con = sqlite3.connect('lab3_database.db')
     cur = con.cursor()
 
     sorted_urls = [ ]
@@ -867,7 +856,7 @@ def get_sorted_urls_db(sorted_doc_ids):
 
 def get_results_db(word):
 
-    con = sqlite3.connect('dbFile_1.db')
+    con = sqlite3.connect('lab3_database.db')
     cur = con.cursor()
 
     sorted_urls = [ ]
@@ -941,11 +930,12 @@ def get_results_db(word):
 
 def get_results_db_alt(word):
 
-    con = sqlite3.connect('dbFile_2.db')
+    con = sqlite3.connect('lab4_database.db')
     cur = con.cursor()
 
     sorted_urls = [ ]
 
+    # get the search results (URL, title, description) from the database
     printcur = cur.execute("SELECT * FROM search_results WHERE word = '%s'" % word)
     sorted_doc_ids = printcur.fetchall()
 
@@ -956,46 +946,45 @@ def get_results_db_alt(word):
 
     return sorted_doc_ids
 
-def get_results_db_multi(words):
-
-    start = time.time()
+def get_results_db_multi_alt(words):
 
     match_urls = { }
 
     for word in words:
         word_results = get_results_db_alt(word)
+
+        # "result" is a tuple with (search_word, URL, title, description, PageRank score)
         for result in word_results:
             url_rank = result[4]
-            result = (result[1], result[2], result[3])
+            result = (result[1], result[2], result[3]) # discard search_word and PageRank score
+
+            # if the website contains 2 or more search words,
+            # bonus points are added to its PageRank score
             if result in match_urls:
-                match_urls[result] += 10 #MULTI_KEYWORD_SCORE
+                match_urls[result] += MULTI_WORD_MATCHED_BONUS
             else:
                 match_urls[result] = url_rank
+
+    sorted_urls = set(sorted_urls)
+    sorted_urls = list(sorted_urls)
 
     sorted_urls = sorted(match_urls.items(), key=itemgetter(1))
 
     sorted_doc_ids = [ ]
 
     for url in sorted_urls:
+        # "url" is a tuple with ((URL, title, description), PageRank_score)
         sorted_doc_ids.append((url[0][0], url[0][1], url[0][2]))
-
-    sorted_doc_ids = set(sorted_doc_ids)
-    sorted_doc_ids = list(sorted_doc_ids) ###########
 
     sorted_doc_ids.reverse()
 
-    end = time.time()
-    print(end - start)
-
     return sorted_doc_ids
 
-def get_results_db_multi_alt(words):
-
-    start = time.time()
+def get_results_db_multi(words):
 
     match_doc_ids = { }
 
-    con = sqlite3.connect('dbFile_2.db')
+    con = sqlite3.connect('lab4_database.db')
     cur = con.cursor()
 
     sorted_urls = [ ]
@@ -1005,22 +994,22 @@ def get_results_db_multi_alt(words):
         sorted_doc_ids = printcur.fetchall()
 
         for result in sorted_doc_ids:
+            # "result" is a tuple with (search_word, doc_id, PageRank_score)
             url_rank = result[2]
             doc_id = result[1]
+
             if doc_id in match_doc_ids:
-                match_doc_ids[doc_id] += MULTI_KEYWORD_SCORE
+                match_doc_ids[doc_id] += MULTI_WORD_MATCHED_BONUS
             else:
                 match_doc_ids[doc_id] = url_rank
 
-            url_rank *= VISIT_SCORE
+            url_rank *= FREQUENTLY_SEARCHED_BONUS
             cur.execute("UPDATE search_results_lite SET PageRank = " + str(url_rank) + " WHERE doc_id = " + str(doc_id))
-
-    sorted_doc_ids = set(sorted_doc_ids)
-    sorted_doc_ids = list(sorted_doc_ids)
 
     sorted_doc_ids = sorted(match_doc_ids.items(), reverse=True, key=itemgetter(1))
 
-    print(sorted_doc_ids)
+    #sorted_doc_ids = set(sorted_doc_ids)
+    #sorted_doc_ids = list(sorted_doc_ids)
 
     sorted_urls = [ ]
 
@@ -1028,35 +1017,15 @@ def get_results_db_multi_alt(words):
         printcur = cur.execute("SELECT * FROM urls_lite WHERE doc_id = '%d'" % doc_id[0])
         website = printcur.fetchone()
 
+        # "doc_id" is a tuple with (doc_id, URL, title, description)
         sorted_urls.append((website[1], website[2], website[3]))
+
+        print(doc_id[1])
 
     con.commit()
     con.close()
 
-    end = time.time()
-    print(end - start)
-
     return sorted_urls
-
-def get_autocompletion_db(word):
-
-    con = sqlite3.connect('dbFile_1.db')
-    cur = con.cursor()
-
-    printcur = cur.execute("SELECT word FROM word_count")
-    word_count = printcur.fetchall()
-
-    word_count
-
-    suggested_words = [ ]
-
-    for item in word_count:
-        if word in item[0]:
-            suggested_words.append(item[0])
-
-    suggested_words.reverse()
-
-    return suggested_words
 
 # CSC326 Lab 4 - END
 
